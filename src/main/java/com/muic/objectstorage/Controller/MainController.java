@@ -18,7 +18,9 @@ public class MainController {
                                            @RequestParam("create") String createAction
     ) {
         try {
-            BucketService.create(bucketname);
+            if (!BucketService.create(bucketname)) {
+                return ResponseEntity.badRequest().build();
+            }
             long currentTime = new Date().getTime();
             return ResponseEntity.ok(new CreateBucketDTO(currentTime, currentTime, bucketname));
         } catch (Exception e) {
