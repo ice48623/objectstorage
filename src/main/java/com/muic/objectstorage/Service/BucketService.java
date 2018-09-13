@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class BucketService {
 
-    public static final String BASE_PATH = "./bucket/";
+    private static final String BASE_PATH = "./bucket/";
 
     public static Boolean create(String bucketname) {
         Path path = Paths.get(BASE_PATH + bucketname);
@@ -21,6 +21,16 @@ public class BucketService {
                 //fail to create directory
                 e.printStackTrace();
             }
+        }
+        return false;
+    }
+
+    public static Boolean drop(String bucketname) {
+        Path path = Paths.get(BASE_PATH + bucketname);
+        try {
+            return Files.deleteIfExists(path);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
