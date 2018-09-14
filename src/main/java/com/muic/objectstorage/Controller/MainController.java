@@ -1,14 +1,17 @@
 package com.muic.objectstorage.Controller;
 
 import com.muic.objectstorage.DTO.CreateBucketDTO;
+import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Service.BucketService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-
 @RestController
 public class MainController {
+
+    @Autowired
+    BucketService bucketService;
 
     @RequestMapping(value = "/{bucketname}", method = RequestMethod.POST)
     public ResponseEntity<CreateBucketDTO> createBucket(
@@ -16,12 +19,13 @@ public class MainController {
             @RequestParam("create") String createAction
     ) {
         try {
-            if (!BucketService.create(bucketname)) {
+            Bucket bucket = bucketService.create(bucketname);
+            if (bucket == null) {
                 return ResponseEntity.badRequest().build();
             }
-            long currentTime = new Date().getTime();
-            return ResponseEntity.ok(new CreateBucketDTO(currentTime, currentTime, bucketname));
+            return ResponseEntity.ok(new CreateBucketDTO(bucket.getCreated(), bucket.getModified(), bucket.getName()));
         } catch (Exception e) {
+
             return ResponseEntity.badRequest().build();
         }
     }
@@ -32,7 +36,7 @@ public class MainController {
             @RequestParam("delete") String deleteAction
     ) {
         try {
-            if (BucketService.drop(bucketname)) {
+            if (bucketService.drop(bucketname)) {
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.badRequest().build();

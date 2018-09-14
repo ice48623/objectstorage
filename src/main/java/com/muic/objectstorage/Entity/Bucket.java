@@ -13,6 +13,14 @@ public class Bucket {
     private long modified;
     private String name;
 
+    public Bucket() {}
+
+    public Bucket(long created, long modified, String name) {
+        this.created = created;
+        this.modified = modified;
+        this.name = name;
+    }
+
     public int getId() {
         return id;
     }
