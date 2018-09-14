@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class BucketEntity {
+public class Bucket {
     @Id
     @GeneratedValue
     private int id;
