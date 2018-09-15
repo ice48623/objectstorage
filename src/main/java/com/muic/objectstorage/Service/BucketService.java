@@ -61,4 +61,14 @@ public class BucketService {
         Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
         return Files.exists(bucketPath) && !Files.exists(objectPath);
     }
+
+    public Boolean deleteObject(String bucketname, String objectname) {
+        try {
+            Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+            return Files.deleteIfExists(objectPath);
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
 }

@@ -62,4 +62,17 @@ public class MainController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteObject(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("delete") String deleteAction
+    ) {
+        if (bucketService.deleteObject(bucketname, objectname)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
