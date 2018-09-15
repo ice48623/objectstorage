@@ -2,7 +2,11 @@ package com.muic.objectstorage.Service;
 
 
 import com.muic.objectstorage.Entity.Bucket;
+import com.muic.objectstorage.Entity.Metadata;
+import com.muic.objectstorage.Entity.Object;
 import com.muic.objectstorage.Repository.BucketRepository;
+import com.muic.objectstorage.Repository.MetadataRepository;
+import com.muic.objectstorage.Repository.ObjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +21,12 @@ public class BucketService {
 
     @Autowired
     BucketRepository bucketRepository;
+
+    @Autowired
+    ObjectRepository objectRepository;
+
+    @Autowired
+    MetadataRepository metadataRepository;
 
     private static final String BASE_PATH = "./bucket/";
 
@@ -70,5 +80,15 @@ public class BucketService {
             return false;
         }
 
+    }
+
+    public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key) {
+        try {
+            Object object = objectRepository.findByName(objectname);
+            metadataRepository.save(new Metadata(key, "zxcv", object));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

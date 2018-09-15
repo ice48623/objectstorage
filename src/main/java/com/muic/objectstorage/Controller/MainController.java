@@ -75,4 +75,15 @@ public class MainController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.PUT)
+    public ResponseEntity<String> addUpdateMetadataByKey(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("metadata") String metadataAction,
+            @RequestParam("key") String key
+    ) {
+        bucketService.addUpdateMetadataByKey(bucketname, objectname, key);
+        return ResponseEntity.ok().build();
+    }
 }

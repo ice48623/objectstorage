@@ -14,6 +14,12 @@ public class Metadata {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Object object;
 
+    public Metadata(String name, String value, Object object) {
+        this.name = name;
+        this.value = value;
+        this.object = object;
+    }
+
     public int getId() {
         return id;
     }
