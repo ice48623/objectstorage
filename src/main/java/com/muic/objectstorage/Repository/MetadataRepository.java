@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MetadataRepository extends CrudRepository<Metadata, Integer> {
-    Metadata findByName(String name);
 }

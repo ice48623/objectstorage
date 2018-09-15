@@ -4,6 +4,7 @@ package com.muic.objectstorage.Service;
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Entity.Metadata;
 import com.muic.objectstorage.Entity.Object;
+import com.muic.objectstorage.Entity.ObjectMetadataComposite;
 import com.muic.objectstorage.Repository.BucketRepository;
 import com.muic.objectstorage.Repository.MetadataRepository;
 import com.muic.objectstorage.Repository.ObjectRepository;
@@ -82,12 +83,14 @@ public class BucketService {
 
     }
 
+    // TODO: 16/9/2018 AD parse value from request body
     public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key) {
         try {
             Object object = objectRepository.findByName(objectname);
-            metadataRepository.save(new Metadata(key, "zxcv", object));
+            metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), "aaaa"));
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

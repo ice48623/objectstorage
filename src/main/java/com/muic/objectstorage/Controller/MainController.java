@@ -83,7 +83,11 @@ public class MainController {
             @RequestParam("metadata") String metadataAction,
             @RequestParam("key") String key
     ) {
-        bucketService.addUpdateMetadataByKey(bucketname, objectname, key);
-        return ResponseEntity.ok().build();
+        if (bucketService.addUpdateMetadataByKey(bucketname, objectname, key)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 }

@@ -5,35 +5,27 @@ import javax.persistence.*;
 @Entity
 public class Metadata {
 
-    @Id
-    @GeneratedValue
-    private int id;
-    private String name;
+    @EmbeddedId
+    private ObjectMetadataComposite id;
     private String value;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "object_id",insertable = false, updatable = false)
     private Object object;
 
-    public Metadata(String name, String value, Object object) {
-        this.name = name;
+    public Metadata() {}
+
+    public Metadata(ObjectMetadataComposite id, String value) {
+        this.id = id;
         this.value = value;
-        this.object = object;
     }
 
-    public int getId() {
+    public ObjectMetadataComposite getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ObjectMetadataComposite id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getValue() {
