@@ -45,4 +45,21 @@ public class MainController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.POST)
+    public ResponseEntity<String> createTicket(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("create") String createAction
+    ) {
+        try {
+            if (bucketService.createTicket(bucketname, objectname)) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

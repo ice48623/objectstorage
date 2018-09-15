@@ -55,4 +55,10 @@ public class BucketService {
         }
         return false;
     }
+
+    public Boolean createTicket(String bucketname, String objectname) {
+        Path bucketPath = Paths.get(BASE_PATH + bucketname);
+        Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+        return Files.exists(bucketPath) && !Files.exists(objectPath);
+    }
 }
