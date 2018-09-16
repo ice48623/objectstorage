@@ -1,5 +1,7 @@
 package com.muic.objectstorage.Service;
 
+import com.muic.objectstorage.DTO.BucketDTO;
+import com.muic.objectstorage.DTO.ObjectDTO;
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Entity.Metadata;
 import com.muic.objectstorage.Entity.Object;
@@ -136,8 +138,33 @@ public class BucketService {
         }
     }
 
+    public BucketDTO listObjectsInBucket(String bucketname) {
+        try {
+            List<Object> objects = getAllObject(bucketname);
+            List<ObjectDTO> objectDTOS = new ArrayList<>();
+            objects.forEach((object) -> objectDTOS.add(new ObjectDTO(object.getName(), getAllMetadata(bucketname, object.getName()))));
+            Bucket bucket = bucketRepository.findByName(bucketname);
+            return new BucketDTO(Long.toString(bucket.getCreated()), Long.toString(bucket.getModified()), bucket.getName(), objectDTOS);
+        } catch (Exception e) {
+            return new BucketDTO();
+        }
+    }
+
+    private List<Object> getAllObject(String bucketname) {
+        return objectRepository.findByBucketId(getBucketIdByName(bucketname));
+    }
+
+    private Integer getBucketIdByName(String bucketname) {
+        return bucketRepository.findByName(bucketname).getId();
+    }
+
     private Boolean isObjectExist(String bucketname, String objectname) {
         Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
         return Files.exists(objectPath);
+    }
+
+    public Boolean isBucketExist(String bucketname) {
+        Path bucketPath = Paths.get(BASE_PATH + bucketname);
+        return Files.exists(bucketPath);
     }
 }

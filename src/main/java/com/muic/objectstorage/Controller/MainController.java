@@ -1,5 +1,6 @@
 package com.muic.objectstorage.Controller;
 
+import com.muic.objectstorage.DTO.BucketDTO;
 import com.muic.objectstorage.DTO.CreateBucketDTO;
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Service.BucketService;
@@ -123,7 +124,7 @@ public class MainController {
     }
 
     @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.GET)
-    public ResponseEntity<HashMap<String, String>> getAllMetadata (
+    public ResponseEntity<HashMap<String, String>> getAllMetadata(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("metadata") String metadataAction
@@ -134,5 +135,21 @@ public class MainController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @RequestMapping(value = "/{bucketname}", method = RequestMethod.GET)
+    public ResponseEntity<BucketDTO> getObjectsInBucket(
+            @PathVariable("bucketname") String bucketname,
+            @RequestParam("list") String list
+    ) {
+        if (bucketService.isBucketExist(bucketname)) {
+            BucketDTO bucketDTO = bucketService.listObjectsInBucket(bucketname);
+            System.out.println(bucketDTO);
+            return ResponseEntity.ok(bucketDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+
+
     }
 }
