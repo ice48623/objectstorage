@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+
 @RestController
 public class MainController {
 
@@ -103,5 +105,21 @@ public class MainController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.GET)
+    public ResponseEntity<HashMap<String, String>> getMetadataByKey(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("metadata") String metadataAction,
+            @RequestParam("key") String key
+    ) {
+        HashMap<String, String> ret = bucketService.getMetadataByKey(bucketname, objectname, key);
+        if (!ret.isEmpty()) {
+            return ResponseEntity.ok(ret);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+
     }
 }

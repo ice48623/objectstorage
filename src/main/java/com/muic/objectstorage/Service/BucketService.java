@@ -1,6 +1,5 @@
 package com.muic.objectstorage.Service;
 
-
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Entity.Metadata;
 import com.muic.objectstorage.Entity.Object;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
+import java.util.*;
 
 @Service
 public class BucketService {
@@ -48,10 +47,6 @@ public class BucketService {
         }
         return null;
     }
-
-//    public void save(long created, long modified, String bucketname) {
-//        bucketRepository.save(new Bucket(created, modified, bucketname));
-//    }
 
     public void save(Bucket bucket) {
         bucketRepository.save(bucket);
@@ -86,8 +81,7 @@ public class BucketService {
     // TODO: 16/9/2018 AD parse value from request body
     public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key) {
         try {
-            Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
-            if (!Files.exists(objectPath)) {
+            if (!isObjectExist(bucketname, objectname)) {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
@@ -100,8 +94,7 @@ public class BucketService {
 
     public Boolean deleteMetadataByKey(String bucketname, String objectname, String key) {
         try {
-            Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
-            if (!Files.exists(objectPath)) {
+            if (!isObjectExist(bucketname, objectname)) {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
@@ -111,5 +104,25 @@ public class BucketService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public HashMap<String, String> getMetadataByKey(String bucketname, String objectname, String key) {
+        try {
+            if (!isObjectExist(bucketname, objectname)) {
+                return new HashMap<>();
+            }
+            Object object = objectRepository.findByName(objectname);
+            Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
+            return new HashMap<String, String>(){{
+                put(key, metadata.getValue());
+            }};
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
+    }
+
+    private Boolean isObjectExist(String bucketname, String objectname) {
+        Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+        return Files.exists(objectPath);
     }
 }
