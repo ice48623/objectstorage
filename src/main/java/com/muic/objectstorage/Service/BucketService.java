@@ -121,6 +121,21 @@ public class BucketService {
         }
     }
 
+    public HashMap<String, String> getAllMetadata(String bucketname, String objectname) {
+        try {
+            if (!isObjectExist(bucketname, objectname)) {
+                return new HashMap<>();
+            }
+            Object object = objectRepository.findByName(objectname);
+            List<Metadata> metadatas = metadataRepository.findByObjectId(object.getId());
+            HashMap<String, String> ret = new HashMap<>();
+            metadatas.forEach((metadata) -> ret.put(metadata.getId().getMetadataName(), metadata.getValue()));
+            return ret;
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
+    }
+
     private Boolean isObjectExist(String bucketname, String objectname) {
         Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
         return Files.exists(objectPath);

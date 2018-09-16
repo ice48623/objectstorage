@@ -107,7 +107,7 @@ public class MainController {
         }
     }
 
-    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{bucketname}/{objectname}", params = "key", method = RequestMethod.GET)
     public ResponseEntity<HashMap<String, String>> getMetadataByKey(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
@@ -120,6 +120,19 @@ public class MainController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
 
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.GET)
+    public ResponseEntity<HashMap<String, String>> getAllMetadata (
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("metadata") String metadataAction
+    ) {
+        HashMap<String, String> ret = bucketService.getAllMetadata(bucketname, objectname);
+        if (!ret.isEmpty()) {
+            return ResponseEntity.ok(ret);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
