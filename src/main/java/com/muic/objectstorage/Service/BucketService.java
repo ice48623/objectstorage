@@ -142,7 +142,7 @@ public class BucketService {
         try {
             List<Object> objects = getAllObject(bucketname);
             List<ObjectDTO> objectDTOS = new ArrayList<>();
-            objects.forEach((object) -> objectDTOS.add(new ObjectDTO(object.getName(), getAllMetadata(bucketname, object.getName()))));
+            objects.forEach((object) -> objectDTOS.add(new ObjectDTO(object.getName(), object.geteTag(), Long.toString(object.getCreated()), Long.toString(object.getModified()))));
             Bucket bucket = bucketRepository.findByName(bucketname);
             return new BucketDTO(Long.toString(bucket.getCreated()), Long.toString(bucket.getModified()), bucket.getName(), objectDTOS);
         } catch (Exception e) {

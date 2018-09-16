@@ -1,16 +1,18 @@
 package com.muic.objectstorage.DTO;
 
-import java.util.HashMap;
-
 public class ObjectDTO {
     private String name;
-    private HashMap<String, String> metadata;
+    private String eTag;
+    private String created;
+    private String modified;
 
     public ObjectDTO() {}
 
-    public ObjectDTO(String name, HashMap<String, String> metadata) {
+    public ObjectDTO(String name, String eTag, String created, String modified) {
         this.name = name;
-        this.metadata = metadata;
+        this.eTag = eTag;
+        this.created = created;
+        this.modified = modified;
     }
 
     public String getName() {
@@ -21,11 +23,27 @@ public class ObjectDTO {
         this.name = name;
     }
 
-    public HashMap<String, String> getMetadata() {
-        return metadata;
+    public String geteTag() {
+        return eTag;
     }
 
-    public void setMetadata(HashMap<String, String> metadata) {
-        this.metadata = metadata;
+    public void seteTag(String eTag) {
+        this.eTag = eTag;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    public String getModified() {
+        return modified;
+    }
+
+    public void setModified(String modified) {
+        this.modified = modified;
     }
 }

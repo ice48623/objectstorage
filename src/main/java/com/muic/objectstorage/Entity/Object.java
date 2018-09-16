@@ -11,6 +11,9 @@ public class Object {
     @GeneratedValue
     private int id;
     private String name;
+    private String eTag;
+    private long created;
+    private long modified;
 
     @ManyToOne
     private Bucket bucket;
@@ -37,5 +40,29 @@ public class Object {
 
     public void setBucket(Bucket bucket) {
         this.bucket = bucket;
+    }
+
+    public String geteTag() {
+        return eTag;
+    }
+
+    public void seteTag(String eTag) {
+        this.eTag = eTag;
+    }
+
+    public long getCreated() {
+        return created;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    public long getModified() {
+        return modified;
+    }
+
+    public void setModified(long modified) {
+        this.modified = modified;
     }
 }
