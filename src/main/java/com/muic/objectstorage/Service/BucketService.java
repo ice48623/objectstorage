@@ -86,11 +86,29 @@ public class BucketService {
     // TODO: 16/9/2018 AD parse value from request body
     public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key) {
         try {
+            Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+            if (!Files.exists(objectPath)) {
+                return false;
+            }
             Object object = objectRepository.findByName(objectname);
             metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), "aaaa"));
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Boolean deleteMetadataByKey(String bucketname, String objectname, String key) {
+        try {
+            Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+            if (!Files.exists(objectPath)) {
+                return false;
+            }
+            Object object = objectRepository.findByName(objectname);
+            Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
+            metadataRepository.delete(metadata);
+            return true;
+        } catch (Exception e) {
             return false;
         }
     }

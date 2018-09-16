@@ -63,7 +63,7 @@ public class MainController {
         }
     }
 
-    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{bucketname}/{objectname}", params = "delete", method = RequestMethod.DELETE)
     public ResponseEntity<String> deleteObject(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
@@ -86,8 +86,22 @@ public class MainController {
         if (bucketService.addUpdateMetadataByKey(bucketname, objectname, key)) {
             return ResponseEntity.ok().build();
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
+    }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", params = "metadata", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteMetadataByKey(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("metadata") String metadataAction,
+            @RequestParam("key") String key
+    ) {
+        if (bucketService.deleteMetadataByKey(bucketname, objectname, key)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
