@@ -84,9 +84,10 @@ public class MainController {
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("metadata") String metadataAction,
-            @RequestParam("key") String key
+            @RequestParam("key") String key,
+            @RequestBody String value
     ) {
-        if (bucketService.addUpdateMetadataByKey(bucketname, objectname, key)) {
+        if (bucketService.addUpdateMetadataByKey(bucketname, objectname, key, value)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

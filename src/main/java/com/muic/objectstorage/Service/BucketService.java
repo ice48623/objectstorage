@@ -80,14 +80,13 @@ public class BucketService {
 
     }
 
-    // TODO: 16/9/2018 AD parse value from request body
-    public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key) {
+    public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key, String value) {
         try {
             if (!isObjectExist(bucketname, objectname)) {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
-            metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), "aaaa"));
+            metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), value));
             return true;
         } catch (Exception e) {
             return false;
