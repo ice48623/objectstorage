@@ -131,7 +131,7 @@ public class MainController {
             @RequestParam("metadata") String metadataAction
     ) {
         HashMap<String, String> ret = bucketService.getAllMetadata(bucketname, objectname);
-        if (!ret.isEmpty()) {
+        if (ret != null) {
             return ResponseEntity.ok(ret);
         } else {
             return ResponseEntity.notFound().build();

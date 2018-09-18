@@ -133,7 +133,7 @@ public class BucketService {
     public HashMap<String, String> getAllMetadata(String bucketname, String objectname) {
         try {
             if (!isObjectExist(bucketname, objectname)) {
-                return new HashMap<>();
+                return null;
             }
             Object object = objectRepository.findByName(objectname);
             List<Metadata> metadatas = metadataRepository.findByObjectId(object.getId());
