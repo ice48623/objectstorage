@@ -91,9 +91,10 @@ public class BucketService {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
-            metadataRepository.save(new Metadata(key, value));
+            metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), value));
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -103,7 +104,7 @@ public class BucketService {
             return false;
         }
         Object object = objectRepository.findByName(objectname);
-        Metadata metadata = metadataRepository.findByNameAndObjectId(key, object.getId());
+        Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
         metadataRepository.deleteById(metadata.getId());
         return true;
     }
@@ -114,7 +115,7 @@ public class BucketService {
                 return new HashMap<>();
             }
             Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findByNameAndObjectId(key, object.getId());
+            Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
             return new HashMap<String, String>(){{
                 put(key, metadata.getValue());
             }};
@@ -131,7 +132,7 @@ public class BucketService {
             Object object = objectRepository.findByName(objectname);
             List<Metadata> metadatas = metadataRepository.findByObjectId(object.getId());
             HashMap<String, String> ret = new HashMap<>();
-            metadatas.forEach((metadata) -> ret.put(metadata.getName(), metadata.getValue()));
+            metadatas.forEach((metadata) -> ret.put(metadata.getId().getMetadataName(), metadata.getValue()));
             return ret;
         } catch (Exception e) {
             return new HashMap<>();
