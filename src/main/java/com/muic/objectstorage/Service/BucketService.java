@@ -70,7 +70,12 @@ public class BucketService {
     public Boolean createTicket(String bucketname, String objectname) {
         Path bucketPath = Paths.get(BASE_PATH + bucketname);
         Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
-        Object object = objectRepository.findByName(objectname);
+        long currentTime = new Date().getTime();
+        Object object = new Object();
+        object.setName(objectname);
+        object.setCreated(currentTime);
+        object.setModified(currentTime);
+        object.setBucket(bucketRepository.findByName(bucketname));
         object.setComplete(false);
         objectRepository.save(object);
         return Files.exists(bucketPath) && !Files.exists(objectPath);
