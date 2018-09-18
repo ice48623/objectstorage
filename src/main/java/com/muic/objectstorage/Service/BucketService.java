@@ -99,17 +99,13 @@ public class BucketService {
     }
 
     public Boolean deleteMetadataByKey(String bucketname, String objectname, String key) {
-        try {
-            if (!isObjectExist(bucketname, objectname)) {
-                return false;
-            }
-            Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findById(object.getId()).get();
-            metadataRepository.delete(metadata);
-            return true;
-        } catch (Exception e) {
+        if (!isObjectExist(bucketname, objectname)) {
             return false;
         }
+        Object object = objectRepository.findByName(objectname);
+        Metadata metadata = metadataRepository.findByNameAndObjectId(key, object.getId());
+        metadataRepository.deleteById(metadata.getId());
+        return true;
     }
 
     public HashMap<String, String> getMetadataByKey(String bucketname, String objectname, String key) {

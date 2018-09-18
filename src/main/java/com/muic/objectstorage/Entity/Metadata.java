@@ -9,7 +9,7 @@ public class Metadata {
     private String name;
     private String value;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "object_id")
     private Object object;
 
