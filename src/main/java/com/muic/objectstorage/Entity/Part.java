@@ -16,10 +16,11 @@ public class Part {
 
     public Part() {}
 
-    public Part(Integer number, Integer length, String md5) {
+    public Part(Integer number, Integer length, String md5, Object object) {
         this.number = number;
         this.length = length;
         this.md5 = md5;
+        this.object = object;
     }
 
     public Integer getNumber() {
