@@ -118,7 +118,7 @@ public class BucketService {
     public HashMap<String, String> getMetadataByKey(String bucketname, String objectname, String key) {
         try {
             if (!isObjectExist(bucketname, objectname)) {
-                return new HashMap<>();
+                return null;
             }
             Object object = objectRepository.findByName(objectname);
             Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();

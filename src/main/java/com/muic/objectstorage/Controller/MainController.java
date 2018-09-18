@@ -117,7 +117,7 @@ public class MainController {
             @RequestParam("key") String key
     ) {
         HashMap<String, String> ret = bucketService.getMetadataByKey(bucketname, objectname, key);
-        if (!ret.isEmpty()) {
+        if (ret != null) {
             return ResponseEntity.ok(ret);
         } else {
             return ResponseEntity.notFound().build();
