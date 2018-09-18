@@ -52,11 +52,17 @@ public class BucketService {
         return null;
     }
 
+    // TODO: 18/9/2018 AD Delete bucket even it is not empty?
     public Boolean drop(String bucketname) {
-        Path path = Paths.get(BASE_PATH + bucketname);
         try {
-            return Files.deleteIfExists(path);
+            Path path = Paths.get(BASE_PATH + bucketname);
+            if (Files.deleteIfExists(path)) {
+                bucketRepository.delete(bucketRepository.findByName(bucketname));
+                return true;
+            }
+            return false;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
