@@ -14,13 +14,14 @@ public class Object {
     private long modified;
     private Boolean complete;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bucket_id")
     private Bucket bucket;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "object", cascade = CascadeType.ALL)
     private Set<Part> parts;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "object", cascade = CascadeType.ALL)
     private Set<Metadata> metadata;
 
     public int getId() {

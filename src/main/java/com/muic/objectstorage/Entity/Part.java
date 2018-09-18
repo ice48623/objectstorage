@@ -7,7 +7,8 @@ public class Part {
     @Id
     private Integer number;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "object_id")
     private Object object;
 
     private Integer length;

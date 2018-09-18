@@ -13,7 +13,7 @@ public class Bucket {
     private long modified;
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bucket", cascade = CascadeType.ALL)
     private Set<Object> objects;
 
     public Bucket() {}
