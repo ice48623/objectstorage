@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MetadataRepository extends CrudRepository<Metadata, ObjectMetadataComposite> {
+public interface MetadataRepository extends CrudRepository<Metadata, String> {
     List<Metadata> findByObjectId(Integer objectId);
 }

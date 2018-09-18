@@ -1,9 +1,7 @@
 package com.muic.objectstorage.Entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 public class Object {
@@ -14,9 +12,16 @@ public class Object {
     private String eTag;
     private long created;
     private long modified;
+    private Boolean complete;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Bucket bucket;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Part> parts;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Metadata> metadata;
 
     public int getId() {
         return id;
@@ -32,14 +37,6 @@ public class Object {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Bucket getBucket() {
-        return bucket;
-    }
-
-    public void setBucket(Bucket bucket) {
-        this.bucket = bucket;
     }
 
     public String geteTag() {
@@ -64,5 +61,37 @@ public class Object {
 
     public void setModified(long modified) {
         this.modified = modified;
+    }
+
+    public Boolean getComplete() {
+        return complete;
+    }
+
+    public void setComplete(Boolean complete) {
+        this.complete = complete;
+    }
+
+    public Bucket getBucket() {
+        return bucket;
+    }
+
+    public void setBucket(Bucket bucket) {
+        this.bucket = bucket;
+    }
+
+    public Set<Part> getParts() {
+        return parts;
+    }
+
+    public void setParts(Set<Part> parts) {
+        this.parts = parts;
+    }
+
+    public Set<Metadata> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Set<Metadata> metadata) {
+        this.metadata = metadata;
     }
 }

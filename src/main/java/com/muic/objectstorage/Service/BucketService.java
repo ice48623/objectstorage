@@ -2,13 +2,12 @@ package com.muic.objectstorage.Service;
 
 import com.muic.objectstorage.DTO.BucketDTO;
 import com.muic.objectstorage.DTO.ObjectDTO;
-import com.muic.objectstorage.Entity.Bucket;
-import com.muic.objectstorage.Entity.Metadata;
+import com.muic.objectstorage.Entity.*;
 import com.muic.objectstorage.Entity.Object;
-import com.muic.objectstorage.Entity.ObjectMetadataComposite;
 import com.muic.objectstorage.Repository.BucketRepository;
 import com.muic.objectstorage.Repository.MetadataRepository;
 import com.muic.objectstorage.Repository.ObjectRepository;
+import com.muic.objectstorage.Repository.PartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +28,9 @@ public class BucketService {
 
     @Autowired
     MetadataRepository metadataRepository;
+
+    @Autowired
+    PartRepository partRepository;
 
     private static final String BASE_PATH = "./bucket/";
 
@@ -59,22 +61,29 @@ public class BucketService {
         try {
             return Files.deleteIfExists(path);
         } catch (Exception e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     public Boolean createTicket(String bucketname, String objectname) {
         Path bucketPath = Paths.get(BASE_PATH + bucketname);
         Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+        Object object = objectRepository.findByName(objectname);
+        object.setComplete(false);
+        objectRepository.save(object);
         return Files.exists(bucketPath) && !Files.exists(objectPath);
     }
 
     public Boolean deleteObject(String bucketname, String objectname) {
         try {
             Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
-            return Files.deleteIfExists(objectPath);
+            if (Files.deleteIfExists(objectPath)) {
+                objectRepository.delete(objectRepository.findByName(objectname));
+                return true;
+            }
+            return false;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
 
@@ -86,7 +95,7 @@ public class BucketService {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
-            metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), value));
+            metadataRepository.save(new Metadata(key, value));
             return true;
         } catch (Exception e) {
             return false;
@@ -99,7 +108,7 @@ public class BucketService {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
+            Metadata metadata = metadataRepository.findById(key).get();
             metadataRepository.delete(metadata);
             return true;
         } catch (Exception e) {
@@ -113,7 +122,7 @@ public class BucketService {
                 return new HashMap<>();
             }
             Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
+            Metadata metadata = metadataRepository.findById(key).get();
             return new HashMap<String, String>(){{
                 put(key, metadata.getValue());
             }};
@@ -130,7 +139,7 @@ public class BucketService {
             Object object = objectRepository.findByName(objectname);
             List<Metadata> metadatas = metadataRepository.findByObjectId(object.getId());
             HashMap<String, String> ret = new HashMap<>();
-            metadatas.forEach((metadata) -> ret.put(metadata.getId().getMetadataName(), metadata.getValue()));
+            metadatas.forEach((metadata) -> ret.put(metadata.getName(), metadata.getValue()));
             return ret;
         } catch (Exception e) {
             return new HashMap<>();
