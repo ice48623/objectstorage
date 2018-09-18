@@ -42,7 +42,7 @@ public class BucketService {
                 Files.createDirectories(path);
                 long currentTime = new Date().getTime();
                 Bucket bucket = new Bucket(currentTime, currentTime, bucketname);
-                save(bucket);
+                bucketRepository.save(bucket);
                 return bucket;
             } catch (IOException e) {
                 //fail to create directory
@@ -50,10 +50,6 @@ public class BucketService {
             }
         }
         return null;
-    }
-
-    public void save(Bucket bucket) {
-        bucketRepository.save(bucket);
     }
 
     public Boolean drop(String bucketname) {
@@ -108,7 +104,7 @@ public class BucketService {
                 return false;
             }
             Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findById(key).get();
+            Metadata metadata = metadataRepository.findById(object.getId()).get();
             metadataRepository.delete(metadata);
             return true;
         } catch (Exception e) {
@@ -122,7 +118,7 @@ public class BucketService {
                 return new HashMap<>();
             }
             Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findById(key).get();
+            Metadata metadata = metadataRepository.findByNameAndObjectId(key, object.getId());
             return new HashMap<String, String>(){{
                 put(key, metadata.getValue());
             }};
