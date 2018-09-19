@@ -1,6 +1,7 @@
 package com.muic.objectstorage.Controller;
 
 import com.muic.objectstorage.DTO.BucketDTO;
+import com.muic.objectstorage.DTO.CompleteUploadResponse;
 import com.muic.objectstorage.DTO.CreateBucketDTO;
 import com.muic.objectstorage.DTO.FileUploadResponse;
 import com.muic.objectstorage.Entity.Bucket;
@@ -159,7 +160,6 @@ public class MainController {
         }
     }
 
-    // TODO: 19/9/2018 AD Clean up return (type)
     @RequestMapping(value = "/{bucketname}/{objectname}", params = "partNumber", method = RequestMethod.PUT)
     public ResponseEntity<?> handleUploadPart(
             @PathVariable("bucketname") String bucketname,
@@ -192,17 +192,18 @@ public class MainController {
         }
     }
 
+    // TODO: 19/9/2018 AD Verify with AJ about "eTag" and "length" of error response
     @RequestMapping(value = "/{bucketname}/{objectname}", params = "complete", method = RequestMethod.POST)
-    public ResponseEntity<String> completeUpload(
+    public ResponseEntity<?> completeUpload(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("complete") String complete
     ) {
+
         try {
-            bucketService.completeUpload(bucketname, objectname);
-            return ResponseEntity.ok().build();
+            HashMap<String, String> ret = bucketService.completeUpload(bucketname, objectname);
+            return ResponseEntity.ok(new CompleteUploadResponse.normal(ret.get("eTag"), Integer.valueOf(ret.get("length")), ret.get("name")));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

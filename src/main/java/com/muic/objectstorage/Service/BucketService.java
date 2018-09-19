@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class BucketService {
@@ -196,7 +198,11 @@ public class BucketService {
 
     public HashMap<String, String> completeUpload(String bucketname, String objectname) {
         if (!isBucketExist(bucketname)) {
-            throw new RuntimeException("Bucket not exist");
+            throw new RuntimeException("InvalidBucket");
+        }
+
+        if (!isValidObjectName(objectname)) {
+            throw new RuntimeException("InvalidObjectName");
         }
 
         Object object = objectRepository.findByName(objectname);
@@ -218,7 +224,7 @@ public class BucketService {
         objectRepository.save(object);
 
         HashMap<String, String> ret = new HashMap<>();
-        ret.put("md5", eTag);
+        ret.put("eTag", eTag);
         ret.put("length", length.toString());
         ret.put("name", objectname);
         return ret;
@@ -263,5 +269,12 @@ public class BucketService {
             eTag.append(s);
         }
         return Utils.calculateMd5FromString(eTag.toString()) + "-" + md5List.size();
+    }
+
+    private Boolean isValidObjectName(String objectname) {
+        String regex = "^[A-Za-z0-9-_]+[A-Za-z0-9.-_]*[A-Za-z0-9_-]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(objectname);
+        return matcher.matches();
     }
 }
