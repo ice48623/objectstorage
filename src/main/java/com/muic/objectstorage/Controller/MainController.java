@@ -138,10 +138,11 @@ public class MainController {
             @PathVariable("objectname") String objectname,
             @RequestParam("metadata") String metadataAction
     ) {
-        HashMap<String, String> ret = bucketService.getAllMetadata(bucketname, objectname);
-        if (ret != null) {
+        try {
+            HashMap<String, String> ret = bucketService.getAllMetadata(bucketname, objectname);
             return ResponseEntity.ok(ret);
-        } else {
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

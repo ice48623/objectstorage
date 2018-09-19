@@ -139,18 +139,21 @@ public class BucketService {
     }
 
     public HashMap<String, String> getAllMetadata(String bucketname, String objectname) {
-        try {
-            if (!isObjectExist(bucketname, objectname)) {
-                return null;
-            }
-            Object object = objectRepository.findByName(objectname);
-            List<Metadata> metadatas = metadataRepository.findByObjectId(object.getId());
-            HashMap<String, String> ret = new HashMap<>();
-            metadatas.forEach((metadata) -> ret.put(metadata.getId().getMetadataName(), metadata.getValue()));
-            return ret;
-        } catch (Exception e) {
-            return new HashMap<>();
+
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
         }
+
+        if (!isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object not exist");
+        }
+
+        Object object = objectRepository.findByName(objectname);
+        List<Metadata> metadatas = metadataRepository.findByObjectId(object.getId());
+        HashMap<String, String> ret = new HashMap<>();
+        metadatas.forEach((metadata) -> ret.put(metadata.getId().getMetadataName(), metadata.getValue()));
+        return ret;
+
     }
 
     public BucketDTO listObjectsInBucket(String bucketname) {
