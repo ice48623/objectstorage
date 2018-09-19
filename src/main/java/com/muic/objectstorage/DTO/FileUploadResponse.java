@@ -7,6 +7,12 @@ public class FileUploadResponse {
         private Integer length;
         private Integer partNumber;
 
+        public normal(String md5, Integer length, Integer partNumber) {
+            this.md5 = md5;
+            this.length = length;
+            this.partNumber = partNumber;
+        }
+
         public String getMd5() {
             return md5;
         }
@@ -37,6 +43,13 @@ public class FileUploadResponse {
         private Integer length;
         private Integer partNumber;
         private String error;
+
+        public withError(String md5, Integer length, Integer partNumber, String error) {
+            this.md5 = md5;
+            this.length = length;
+            this.partNumber = partNumber;
+            this.error = error;
+        }
 
         public String getMd5() {
             return md5;

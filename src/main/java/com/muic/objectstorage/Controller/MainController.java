@@ -2,6 +2,7 @@ package com.muic.objectstorage.Controller;
 
 import com.muic.objectstorage.DTO.BucketDTO;
 import com.muic.objectstorage.DTO.CreateBucketDTO;
+import com.muic.objectstorage.DTO.FileUploadResponse;
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Service.BucketService;
@@ -160,7 +161,7 @@ public class MainController {
 
     // TODO: 19/9/2018 AD Clean up return (type)
     @RequestMapping(value = "/{bucketname}/{objectname}", params = "partNumber", method = RequestMethod.PUT)
-    public ResponseEntity<HashMap<String, String>> handleUploadPart(
+    public ResponseEntity<?> handleUploadPart(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("partNumber") Integer partNumber,
@@ -170,18 +171,9 @@ public class MainController {
     ) {
         try {
             String md5 = storageService.storeFile(requestServlet, bucketname, objectname, partNumber, partSize, partMd5);
-            HashMap<String, String> ret = new HashMap<>();
-            ret.put("md5", md5);
-            ret.put("length", partSize.toString());
-            ret.put("partNumber", partNumber.toString());
-            return ResponseEntity.ok(ret);
+            return ResponseEntity.ok(new FileUploadResponse.normal(md5, partSize, partNumber));
         } catch (FileStorageException e) {
-            HashMap<String, String> ret = new HashMap<>();
-            ret.put("md5", "md5");
-            ret.put("length", partSize.toString());
-            ret.put("partNumber", partNumber.toString());
-            ret.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(ret);
+            return ResponseEntity.badRequest().body(new FileUploadResponse.withError(partMd5, partSize, partNumber, e.getMessage()));
         }
     }
 
