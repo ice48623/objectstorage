@@ -124,11 +124,17 @@ public class MainController {
             @RequestParam("metadata") String metadataAction,
             @RequestParam("key") String key
     ) {
-        HashMap<String, String> ret = bucketService.getMetadataByKey(bucketname, objectname, key);
-        if (ret != null) {
+        try {
+            HashMap<String, String> ret = bucketService.getMetadataByKey(bucketname, objectname, key);
             return ResponseEntity.ok(ret);
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            switch (e.getMessage()) {
+                case "No value present":
+                    return ResponseEntity.ok(new HashMap<>());
+
+                default: return ResponseEntity.notFound().build();
+            }
         }
     }
 

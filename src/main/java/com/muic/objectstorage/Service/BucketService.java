@@ -124,18 +124,20 @@ public class BucketService {
     }
 
     public HashMap<String, String> getMetadataByKey(String bucketname, String objectname, String key) {
-        try {
-            if (!isObjectExist(bucketname, objectname)) {
-                return null;
-            }
-            Object object = objectRepository.findByName(objectname);
-            Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
-            return new HashMap<String, String>(){{
-                put(key, metadata.getValue());
-            }};
-        } catch (Exception e) {
-            return new HashMap<>();
+
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
         }
+
+        if (!isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object not exist");
+        }
+
+        Object object = objectRepository.findByName(objectname);
+        Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
+        return new HashMap<String, String>(){{
+            put(key, metadata.getValue());
+        }};
     }
 
     public HashMap<String, String> getAllMetadata(String bucketname, String objectname) {
