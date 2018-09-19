@@ -99,18 +99,17 @@ public class BucketService {
 
     }
 
-    public Boolean addUpdateMetadataByKey(String bucketname, String objectname, String key, String value) {
-        try {
-            if (!isObjectExist(bucketname, objectname)) {
-                return false;
-            }
-            Object object = objectRepository.findByName(objectname);
-            metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), value));
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    public void addUpdateMetadataByKey(String bucketname, String objectname, String key, String value) {
+
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
         }
+
+        if (!isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object not exist");
+        }
+        Object object = objectRepository.findByName(objectname);
+        metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), value));
     }
 
     public Boolean deleteMetadataByKey(String bucketname, String objectname, String key) {

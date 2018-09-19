@@ -95,12 +95,12 @@ public class MainController {
             @RequestParam("key") String key,
             @RequestBody String value
     ) {
-        if (bucketService.addUpdateMetadataByKey(bucketname, objectname, key, value)) {
+        try {
+            bucketService.addUpdateMetadataByKey(bucketname, objectname, key, value);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-
     }
 
     @RequestMapping(value = "/{bucketname}/{objectname}", params = "metadata", method = RequestMethod.DELETE)
