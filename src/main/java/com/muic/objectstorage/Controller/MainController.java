@@ -2,23 +2,15 @@ package com.muic.objectstorage.Controller;
 
 import com.muic.objectstorage.DTO.BucketDTO;
 import com.muic.objectstorage.DTO.CreateBucketDTO;
-import com.muic.objectstorage.DTO.FileUploadResponse;
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Service.BucketService;
 import com.muic.objectstorage.Service.StorageService;
-import com.muic.objectstorage.Service.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.support.HttpRequestHandlerServlet;
-import org.springframework.web.multipart.MultipartFile;
-import sun.misc.IOUtils;
-
-import javax.rmi.CORBA.Util;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
 @RestController
@@ -191,6 +183,20 @@ public class MainController {
             ret.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(ret);
         }
+    }
 
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deletePart(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("partNumber") Integer partNumber
+    ) {
+        try {
+            bucketService.deletePart(bucketname, objectname, partNumber);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

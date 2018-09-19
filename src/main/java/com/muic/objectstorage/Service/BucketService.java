@@ -10,6 +10,7 @@ import com.muic.objectstorage.Repository.ObjectRepository;
 import com.muic.objectstorage.Repository.PartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -162,6 +163,37 @@ public class BucketService {
         }
     }
 
+    public void deletePart(String bucketname, String objectname, Integer partNumber) {
+        try {
+
+            String fileName = StringUtils.cleanPath(String.format("%05d", partNumber) + "_" + objectname);
+
+            if (!isBucketExist(bucketname)) {
+                throw new RuntimeException("bucket not exist");
+            }
+
+            if (!isPartExist(bucketname, fileName)) {
+                throw new RuntimeException("Part not exist");
+            }
+
+            if (!isValidPartNumberRange(partNumber)) {
+                throw new RuntimeException("Invalid part number");
+            }
+
+            if (!isObjectComplete(objectname)) {
+                throw new RuntimeException("Object is already marked as complete");
+            }
+
+            Path partPath = Paths.get(BASE_PATH + bucketname + "/" + fileName);
+            Object object = objectRepository.findByName(objectname);
+            if (Files.deleteIfExists(partPath)) {
+                partRepository.delete(partRepository.findByObjectIdAndNumber(object.getId(), partNumber));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     private List<Object> getAllObject(String bucketname) {
         return objectRepository.findByBucketId(getBucketIdByName(bucketname));
     }
@@ -178,5 +210,20 @@ public class BucketService {
     public Boolean isBucketExist(String bucketname) {
         Path bucketPath = Paths.get(BASE_PATH + bucketname);
         return Files.exists(bucketPath);
+    }
+
+    private Boolean isValidPartNumberRange(Integer partNumber) {
+        return partNumber > 0 && partNumber <= 10000;
+    }
+
+    private Boolean isObjectComplete(String objectname) {
+        Object object = objectRepository.findByName(objectname);
+        System.out.println(object.getComplete());
+        return object.getComplete() != null && object.getComplete() == false;
+    }
+
+    private Boolean isPartExist(String bucketname, String partName) {
+        Path partPath = Paths.get(BASE_PATH + bucketname + "/" + partName);
+        return Files.exists(partPath);
     }
 }

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface PartRepository extends CrudRepository<Part, Integer> {
     List<Part> findByObjectId(Integer objectId);
+
+    Part findByObjectIdAndNumber(Integer objectId, Integer number);
 }
