@@ -69,13 +69,16 @@ public class BucketService {
         }
     }
 
-    // TODO: 19/9/2018 AD Use composite key for object entity
     public void createTicket(String bucketname, String objectname) {
         if (!isBucketExist(bucketname)) {
             throw new RuntimeException("Bucket not exist");
         }
 
         if (isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object already exist");
+        }
+
+        if (objectRepository.findByName(objectname) != null && objectRepository.findByName(objectname).getName().equals(objectname)) {
             throw new RuntimeException("Object already exist");
         }
 
