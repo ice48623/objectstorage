@@ -110,9 +110,11 @@ public class MainController {
             @RequestParam("metadata") String metadataAction,
             @RequestParam("key") String key
     ) {
-        if (bucketService.deleteMetadataByKey(bucketname, objectname, key)) {
+        try {
+            bucketService.deleteMetadataByKey(bucketname, objectname, key);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

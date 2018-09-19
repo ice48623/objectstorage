@@ -112,14 +112,19 @@ public class BucketService {
         metadataRepository.save(new Metadata(new ObjectMetadataComposite(object.getId(), key), value));
     }
 
-    public Boolean deleteMetadataByKey(String bucketname, String objectname, String key) {
-        if (!isObjectExist(bucketname, objectname)) {
-            return false;
+    public void deleteMetadataByKey(String bucketname, String objectname, String key) {
+
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
         }
+
+        if (!isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object not exist");
+        }
+
         Object object = objectRepository.findByName(objectname);
         Metadata metadata = metadataRepository.findById(new ObjectMetadataComposite(object.getId(), key)).get();
         metadataRepository.deleteById(metadata.getId());
-        return true;
     }
 
     public HashMap<String, String> getMetadataByKey(String bucketname, String objectname, String key) {
