@@ -70,9 +70,16 @@ public class BucketService {
         }
     }
 
-    public Boolean createTicket(String bucketname, String objectname) {
-        Path bucketPath = Paths.get(BASE_PATH + bucketname);
-        Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
+    // TODO: 19/9/2018 AD Use composite key for object entity 
+    public void createTicket(String bucketname, String objectname) {
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
+        }
+
+        if (isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object already exist");
+        }
+
         long currentTime = new Date().getTime();
         Object object = new Object();
         object.setName(objectname);
@@ -81,7 +88,6 @@ public class BucketService {
         object.setBucket(bucketRepository.findByName(bucketname));
         object.setComplete(false);
         objectRepository.save(object);
-        return Files.exists(bucketPath) && !Files.exists(objectPath);
     }
 
     public void deleteObject(String bucketname, String objectname) {

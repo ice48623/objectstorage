@@ -64,12 +64,10 @@ public class MainController {
             @RequestParam("create") String createAction
     ) {
         try {
-            if (bucketService.createTicket(bucketname, objectname)) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
+            bucketService.createTicket(bucketname, objectname);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
