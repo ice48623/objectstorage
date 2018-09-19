@@ -7,12 +7,20 @@ import com.muic.objectstorage.Repository.BucketRepository;
 import com.muic.objectstorage.Repository.ObjectRepository;
 import com.muic.objectstorage.Repository.PartRepository;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.rmi.CORBA.Util;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,16 +42,17 @@ public class StorageService {
 
     private static final String BASE_PATH = "./bucket/";
 
-    public void storeFile(MultipartFile file, String bucketname, String objectname, Integer partNumber, Integer partSize, String partMd5) {
-        // Normalize file name
+    public String storeFile(HttpServletRequest request, String bucketname, String objectname, Integer partNumber, Integer partSize, String partMd5) {
         try {
-            String fileName = StringUtils.cleanPath(objectname + "-" + partNumber);
 
+            ServletInputStream file = request.getInputStream();
+            String fileName = StringUtils.cleanPath(objectname + "-" + partNumber);
             if (!Files.exists(Paths.get(BASE_PATH + bucketname))) {
                 throw new FileStorageException("InvalidBucket");
             }
 
             if ((objectRepository.findByName(objectname).getComplete() == null || !objectRepository.findByName(objectname).getComplete()) && !Files.exists(Paths.get(BASE_PATH + bucketname + "/" + objectname))) {
+
                 if (!isValidPartNumberRange(partNumber)) {
                     throw new FileStorageException("InvalidPartNumber");
                 }
@@ -52,19 +61,22 @@ public class StorageService {
                     throw new FileStorageException("InvalidObjectName");
                 }
 
-                if (partSize != file.getSize()) {
+                if (partSize != request.getContentLength()) {
                     throw new FileStorageException("LengthMismatched");
                 }
 
-                if (!partMd5.equals(calculateMd5(file))) {
+                File targetFile = new File(BASE_PATH + bucketname + "/" + fileName);
+                FileUtils.copyInputStreamToFile(file, targetFile);
+                String md5 = Utils.calculateMd5(new File(BASE_PATH + bucketname + "/" + fileName));
+                if (!partMd5.equals(md5)) {
+                    // TODO: 19/9/2018 AD Clean up file if mismatch
+                    System.out.println(md5);
                     throw new FileStorageException("MD5Mismatched");
                 }
-
-                // Copy file to the target location (Replacing existing file with the same name)
-                Path targetLocation = Paths.get(BASE_PATH + bucketname + "/" + fileName);
-                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
                 savePart(objectname, partNumber, partSize, partMd5);
+                return md5;
             }
+            return null;
         } catch (IOException ex) {
             throw new FileStorageException("Unable to save file");
         }
@@ -79,14 +91,6 @@ public class StorageService {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(objectname);
         return matcher.matches();
-    }
-
-    private String calculateMd5(MultipartFile file) {
-        try {
-            return DigestUtils.md5Hex(file.getBytes());
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to calculate md5 for " + file.getName());
-        }
     }
 
     private void savePart(String objectname, Integer partNumber, Integer partSize, String partMd5) {

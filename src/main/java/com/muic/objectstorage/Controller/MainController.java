@@ -7,11 +7,18 @@ import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Service.BucketService;
 import com.muic.objectstorage.Service.StorageService;
+import com.muic.objectstorage.Service.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.support.HttpRequestHandlerServlet;
 import org.springframework.web.multipart.MultipartFile;
+import sun.misc.IOUtils;
 
+import javax.rmi.CORBA.Util;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 @RestController
@@ -159,27 +166,27 @@ public class MainController {
         }
     }
 
+    // TODO: 19/9/2018 AD Clean up return (type)
     @RequestMapping(value = "/{bucketname}/{objectname}", params = "partNumber", method = RequestMethod.PUT)
     public ResponseEntity<HashMap<String, String>> handleUploadPart(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("partNumber") Integer partNumber,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("partSize") Integer partSize,
-            @RequestParam("partMd5") String partMd5
+            @RequestHeader("Content-Length") Integer partSize,
+            @RequestHeader("Content-MD5") String partMd5,
+            HttpServletRequest requestServlet
     ) {
         try {
-            storageService.storeFile(file, bucketname, objectname, partNumber, partSize, partMd5);
+            String md5 = storageService.storeFile(requestServlet, bucketname, objectname, partNumber, partSize, partMd5);
             HashMap<String, String> ret = new HashMap<>();
-            ret.put("md5", "md5");
-            ret.put("length", Long.toString(file.getSize()));
+            ret.put("md5", md5);
+            ret.put("length", partSize.toString());
             ret.put("partNumber", partNumber.toString());
             return ResponseEntity.ok(ret);
-
         } catch (FileStorageException e) {
             HashMap<String, String> ret = new HashMap<>();
             ret.put("md5", "md5");
-            ret.put("length", Long.toString(file.getSize()));
+            ret.put("length", partSize.toString());
             ret.put("partNumber", partNumber.toString());
             ret.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(ret);
