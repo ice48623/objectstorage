@@ -154,15 +154,16 @@ public class BucketService {
     }
 
     public BucketDTO listObjectsInBucket(String bucketname) {
-        try {
-            List<Object> objects = getAllObject(bucketname);
-            List<ObjectDTO> objectDTOS = new ArrayList<>();
-            objects.forEach((object) -> objectDTOS.add(new ObjectDTO(object.getName(), object.geteTag(), Long.toString(object.getCreated()), Long.toString(object.getModified()))));
-            Bucket bucket = bucketRepository.findByName(bucketname);
-            return new BucketDTO(Long.toString(bucket.getCreated()), Long.toString(bucket.getModified()), bucket.getName(), objectDTOS);
-        } catch (Exception e) {
-            return new BucketDTO();
+
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
         }
+
+        List<Object> objects = getAllObject(bucketname);
+        List<ObjectDTO> objectDTOS = new ArrayList<>();
+        objects.forEach((object) -> objectDTOS.add(new ObjectDTO(object.getName(), object.geteTag(), Long.toString(object.getCreated()), Long.toString(object.getModified()))));
+        Bucket bucket = bucketRepository.findByName(bucketname);
+        return new BucketDTO(Long.toString(bucket.getCreated()), Long.toString(bucket.getModified()), bucket.getName(), objectDTOS);
     }
 
     public void deletePart(String bucketname, String objectname, Integer partNumber) {

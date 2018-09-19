@@ -151,12 +151,11 @@ public class MainController {
             @PathVariable("bucketname") String bucketname,
             @RequestParam("list") String list
     ) {
-        if (bucketService.isBucketExist(bucketname)) {
+        try {
             BucketDTO bucketDTO = bucketService.listObjectsInBucket(bucketname);
-            System.out.println(bucketDTO);
             return ResponseEntity.ok(bucketDTO);
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
