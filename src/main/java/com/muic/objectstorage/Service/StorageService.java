@@ -46,7 +46,7 @@ public class StorageService {
         try {
 
             ServletInputStream file = request.getInputStream();
-            String fileName = StringUtils.cleanPath(objectname + "-" + partNumber);
+            String fileName = StringUtils.cleanPath(String.format("%05d", partNumber) + "_" + objectname);
             if (!Files.exists(Paths.get(BASE_PATH + bucketname))) {
                 throw new FileStorageException("InvalidBucket");
             }
