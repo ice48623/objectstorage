@@ -8,10 +8,12 @@ import com.muic.objectstorage.Repository.BucketRepository;
 import com.muic.objectstorage.Repository.MetadataRepository;
 import com.muic.objectstorage.Repository.ObjectRepository;
 import com.muic.objectstorage.Repository.PartRepository;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,22 +57,16 @@ public class BucketService {
         return null;
     }
 
-    // TODO: 18/9/2018 AD Delete bucket even it is not empty?
-    public Boolean drop(String bucketname) {
+    public void drop(String bucketname) {
         try {
-            Path path = Paths.get(BASE_PATH + bucketname);
-            if (Files.deleteIfExists(path)) {
-                bucketRepository.delete(bucketRepository.findByName(bucketname));
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            FileUtils.deleteDirectory(new File(BASE_PATH + bucketname));
+            bucketRepository.delete(bucketRepository.findByName(bucketname));
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    // TODO: 19/9/2018 AD Use composite key for object entity 
+    // TODO: 19/9/2018 AD Use composite key for object entity
     public void createTicket(String bucketname, String objectname) {
         if (!isBucketExist(bucketname)) {
             throw new RuntimeException("Bucket not exist");

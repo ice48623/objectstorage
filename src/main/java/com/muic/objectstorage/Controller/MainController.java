@@ -47,12 +47,10 @@ public class MainController {
             @RequestParam("delete") String deleteAction
     ) {
         try {
-            if (bucketService.drop(bucketname)) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
+            bucketService.drop(bucketname);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
