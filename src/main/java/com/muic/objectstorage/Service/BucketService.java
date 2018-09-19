@@ -40,21 +40,24 @@ public class BucketService {
     private static final String BASE_PATH = "./bucket/";
 
     public Bucket create(String bucketname) {
-        Path path = Paths.get(BASE_PATH + bucketname);
-        //if directory exists?
-        if (!Files.exists(path)) {
-            try {
-                Files.createDirectories(path);
-                long currentTime = new Date().getTime();
-                Bucket bucket = new Bucket(currentTime, currentTime, bucketname);
-                bucketRepository.save(bucket);
-                return bucket;
-            } catch (IOException e) {
-                //fail to create directory
-                e.printStackTrace();
-            }
+        if (isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket already exist");
         }
-        return null;
+
+        if (!isValidBucketName(bucketname)) {
+            throw new RuntimeException("Invalid bucket name");
+        }
+
+        try {
+            Path path = Paths.get(BASE_PATH + bucketname);
+            Files.createDirectories(path);
+            long currentTime = new Date().getTime();
+            Bucket bucket = new Bucket(currentTime, currentTime, bucketname);
+            bucketRepository.save(bucket);
+            return bucket;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void drop(String bucketname) {
@@ -62,7 +65,7 @@ public class BucketService {
             FileUtils.deleteDirectory(new File(BASE_PATH + bucketname));
             bucketRepository.delete(bucketRepository.findByName(bucketname));
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -293,6 +296,13 @@ public class BucketService {
         String regex = "^[A-Za-z0-9-_]+[A-Za-z0-9.-_]*[A-Za-z0-9_-]";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(objectname);
+        return matcher.matches();
+    }
+
+    private Boolean isValidBucketName(String bucketname) {
+        String regex = "^[A-Za-z0-9-_]*$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(bucketname);
         return matcher.matches();
     }
 }

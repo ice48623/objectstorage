@@ -31,12 +31,8 @@ public class MainController {
     ) {
         try {
             Bucket bucket = bucketService.create(bucketname);
-            if (bucket == null) {
-                return ResponseEntity.badRequest().build();
-            }
             return ResponseEntity.ok(new CreateBucketDTO(bucket.getCreated(), bucket.getModified(), bucket.getName()));
         } catch (Exception e) {
-
             return ResponseEntity.badRequest().build();
         }
     }
