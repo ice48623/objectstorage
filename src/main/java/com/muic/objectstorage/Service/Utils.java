@@ -15,4 +15,12 @@ public class Utils {
             throw new RuntimeException("Unable to calculate md5");
         }
     }
+
+    public static String calculateMd5FromString(String file) {
+        try {
+            return DigestUtils.md5Hex(file);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to calculate md5");
+        }
+    }
 }

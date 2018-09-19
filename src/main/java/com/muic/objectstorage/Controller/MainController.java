@@ -199,4 +199,19 @@ public class MainController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", params = "complete", method = RequestMethod.POST)
+    public ResponseEntity<String> completeUpload(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestParam("complete") String complete
+    ) {
+        try {
+            bucketService.completeUpload(bucketname, objectname);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

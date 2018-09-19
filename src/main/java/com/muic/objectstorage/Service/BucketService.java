@@ -194,6 +194,36 @@ public class BucketService {
         }
     }
 
+    public HashMap<String, String> completeUpload(String bucketname, String objectname) {
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
+        }
+
+        Object object = objectRepository.findByName(objectname);
+        List<Part> parts = partRepository.findByObjectId(object.getId());
+        long currentTime = new Date().getTime();
+        Integer length = 0;
+        List<String> md5List = new ArrayList<>();
+
+        for (Part part : parts) {
+            md5List.add(part.getMd5());
+            length += part.getLength();
+        }
+
+        String eTag = computeETag(md5List);
+
+        object.setModified(currentTime);
+        object.seteTag(eTag);
+        object.setComplete(true);
+        objectRepository.save(object);
+
+        HashMap<String, String> ret = new HashMap<>();
+        ret.put("md5", eTag);
+        ret.put("length", length.toString());
+        ret.put("name", objectname);
+        return ret;
+    }
+
     private List<Object> getAllObject(String bucketname) {
         return objectRepository.findByBucketId(getBucketIdByName(bucketname));
     }
@@ -225,5 +255,13 @@ public class BucketService {
     private Boolean isPartExist(String bucketname, String partName) {
         Path partPath = Paths.get(BASE_PATH + bucketname + "/" + partName);
         return Files.exists(partPath);
+    }
+
+    private String computeETag(List<String> md5List) {
+        StringBuilder eTag = new StringBuilder();
+        for (String s : md5List) {
+            eTag.append(s);
+        }
+        return Utils.calculateMd5FromString(eTag.toString()) + "-" + md5List.size();
     }
 }
