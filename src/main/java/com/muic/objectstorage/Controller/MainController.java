@@ -80,9 +80,10 @@ public class MainController {
             @PathVariable("objectname") String objectname,
             @RequestParam("delete") String deleteAction
     ) {
-        if (bucketService.deleteObject(bucketname, objectname)) {
+        try {
+            bucketService.deleteObject(bucketname, objectname);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }

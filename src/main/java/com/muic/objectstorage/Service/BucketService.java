@@ -84,17 +84,23 @@ public class BucketService {
         return Files.exists(bucketPath) && !Files.exists(objectPath);
     }
 
-    public Boolean deleteObject(String bucketname, String objectname) {
+    public void deleteObject(String bucketname, String objectname) {
+
+        if (!isBucketExist(bucketname)) {
+            throw new RuntimeException("Bucket not exist");
+        }
+
+        if (!isObjectExist(bucketname, objectname)) {
+            throw new RuntimeException("Object not exist");
+        }
+
         try {
             Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
             if (Files.deleteIfExists(objectPath)) {
                 objectRepository.delete(objectRepository.findByName(objectname));
-                return true;
             }
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        } catch (IOException e) {
+            throw new RuntimeException("Could not delete object");
         }
 
     }
