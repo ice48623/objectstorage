@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.HashMap;
+import java.util.Optional;
 
 @RestController
 public class MainController {
@@ -219,13 +220,18 @@ public class MainController {
     public ResponseEntity<?> downloadObject(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
-            @RequestHeader("Range") String range,
-//            @RequestHeader("ETag") String eTag,
+            @RequestHeader("Range") Optional<String> range,
             HttpServletResponse response
     ) {
         FileInputStream input = null;
+        SequenceInputStream sequenceInputStream;
+        if (range.isPresent()) {
+            sequenceInputStream = storageService.getObjectWithRange(bucketname, objectname, range.get(), input);
+        } else {
+            sequenceInputStream = storageService.getFile(bucketname, objectname, input);
+        }
         response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", objectname));
-        SequenceInputStream sequenceInputStream = storageService.getObject(bucketname, objectname, "", range, input);
+        response.setHeader("ETag", storageService.getETag(objectname));
         try {
             IOUtils.copyLarge(sequenceInputStream, response.getOutputStream());
         } catch (IOException e) {
@@ -240,7 +246,6 @@ public class MainController {
             } catch (IOException e){
                 e.printStackTrace();
             }
-
         }
         return ResponseEntity.ok().build();
     }

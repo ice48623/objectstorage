@@ -111,7 +111,7 @@ public class StorageService {
         return StringUtils.cleanPath(String.format("%05d", partNumber) + "_" + objectname);
     }
 
-    public SequenceInputStream getObject(String bucketname, String objectname, String eTag, String range, FileInputStream input) {
+    public SequenceInputStream getObjectWithRange(String bucketname, String objectname, String range, FileInputStream input) {
 
         HashMap<String, Long> ranges = parseRange(range);
         long start = ranges.get("start");
@@ -181,6 +181,37 @@ public class StorageService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public SequenceInputStream getFile(String bucketname, String objectname, FileInputStream input) {
+
+        Object object = objectRepository.findByName(objectname);
+        List<Part> parts = partRepository.findByObjectId(object.getId());
+        Collections.sort(parts);
+
+        long objectLength = 0;
+        for (Part part : parts) {
+            objectLength += part.getLength();
+        }
+
+        System.out.println("Object Length: " + objectLength);
+
+        List<InputStream> filesStream = new ArrayList<>();
+
+        try {
+            for (Part part : parts) {
+                System.out.println("Reading part: " + part.getNumber());
+                input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getNumber()));
+                filesStream.add(input);
+            }
+            return new SequenceInputStream(Collections.enumeration(filesStream));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getETag(String objectname) {
+        return objectRepository.findByName(objectname).geteTag();
     }
 
     public HashMap<String, Long> parseRange(String range) {
