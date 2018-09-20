@@ -206,7 +206,7 @@ public class BucketService {
                 throw new RuntimeException("Invalid part number");
             }
 
-            if (!isObjectComplete(objectname)) {
+            if (isObjectComplete(objectname)) {
                 throw new RuntimeException("Object is already marked as complete");
             }
 
@@ -214,7 +214,7 @@ public class BucketService {
             Object object = objectRepository.findByName(objectname);
             if (Files.deleteIfExists(partPath)) {
                 partRepository.delete(partRepository.findByObjectIdAndNumber(object.getId(), partNumber));
-
+                updateObjectETag(objectname);
             }
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
@@ -279,8 +279,7 @@ public class BucketService {
 
     private Boolean isObjectComplete(String objectname) {
         Object object = objectRepository.findByName(objectname);
-        System.out.println(object.getComplete());
-        return object.getComplete() != null && object.getComplete() == false;
+        return object.getComplete() != null && object.getComplete();
     }
 
     private Boolean isPartExist(String bucketname, String partName) {
@@ -334,5 +333,22 @@ public class BucketService {
             length += part.getLength();
         }
         return length;
+    }
+
+    private void updateObjectETag(String objectname) {
+        Object object = objectRepository.findByName(objectname);
+        List<Part> parts = partRepository.findByObjectId(object.getId());
+        long currentTime = new Date().getTime();
+        List<String> md5List = new ArrayList<>();
+
+        for (Part part : parts) {
+            md5List.add(part.getMd5());
+        }
+
+        String eTag = Utils.computeETag(md5List);
+
+        object.setModified(currentTime);
+        object.seteTag(eTag);
+        objectRepository.save(object);
     }
 }

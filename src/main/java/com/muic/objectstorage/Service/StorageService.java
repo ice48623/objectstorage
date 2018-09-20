@@ -6,28 +6,20 @@ import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Repository.BucketRepository;
 import com.muic.objectstorage.Repository.ObjectRepository;
 import com.muic.objectstorage.Repository.PartRepository;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.rmi.CORBA.Util;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class StorageService {
@@ -44,10 +36,10 @@ public class StorageService {
     private static final String BASE_PATH = "./bucket/";
 
     public String storeFile(HttpServletRequest request, String bucketname, String objectname, Integer partNumber, Integer partSize, String partMd5) {
+        String md5 = "";
         try {
-
             ServletInputStream file = request.getInputStream();
-            String fileName = StringUtils.cleanPath(String.format("%05d", partNumber) + "_" + objectname);
+            String fileName = getFilename(objectname, partNumber);
             if (!Files.exists(Paths.get(BASE_PATH + bucketname))) {
                 throw new FileStorageException("InvalidBucket");
             }
@@ -68,16 +60,15 @@ public class StorageService {
 
                 File targetFile = new File(BASE_PATH + bucketname + "/" + fileName);
                 FileUtils.copyInputStreamToFile(file, targetFile);
-                String md5 = Utils.calculateMd5(new File(BASE_PATH + bucketname + "/" + fileName));
+                md5 = Utils.calculateMd5(new File(BASE_PATH + bucketname + "/" + fileName));
                 if (!partMd5.equals(md5)) {
                     // TODO: 19/9/2018 AD Clean up file if mismatch
                     System.out.println(md5);
                     throw new FileStorageException("MD5Mismatched");
                 }
                 savePart(objectname, partNumber, request.getContentLength(), md5);
-                return md5;
             }
-            return null;
+            return md5;
         } catch (IOException ex) {
             throw new FileStorageException("Unable to save file");
         }
