@@ -225,18 +225,20 @@ public class MainController {
             HttpServletResponse response
     ) {
         FileInputStream input = null;
-        SequenceInputStream sequenceInputStream;
-        if (range.isPresent()) {
-            sequenceInputStream = storageService.getObjectWithRange(bucketname, objectname, range.get(), input);
-        } else {
-            sequenceInputStream = storageService.getFile(bucketname, objectname, input);
-        }
-        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", objectname));
-        response.setHeader("ETag", storageService.getETag(objectname));
         try {
+            SequenceInputStream sequenceInputStream;
+            if (range.isPresent()) {
+                sequenceInputStream = storageService.getObjectWithRange(bucketname, objectname, range.get(), input);
+            } else {
+                sequenceInputStream = storageService.getFile(bucketname, objectname, input);
+            }
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", objectname));
+            response.setHeader("ETag", storageService.getETag(objectname));
+
             IOUtils.copyLarge(sequenceInputStream, response.getOutputStream());
+            return ResponseEntity.ok().build();
         } catch (IOException e) {
-            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
         } finally {
             System.out.println("Finally");
             try {
@@ -248,6 +250,6 @@ public class MainController {
                 e.printStackTrace();
             }
         }
-        return ResponseEntity.ok().build();
+
     }
 }
