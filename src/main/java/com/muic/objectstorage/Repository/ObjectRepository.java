@@ -8,4 +8,5 @@ import java.util.List;
 public interface ObjectRepository extends CrudRepository<Object, Integer> {
     Object findByName(String name);
     List<Object> findByBucketId(Integer bucketId);
+    Object findByNameAndBucketId(String name, Integer bucketId);
 }

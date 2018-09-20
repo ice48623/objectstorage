@@ -24,10 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -101,6 +98,7 @@ public class StorageService {
         try {
             Object object = objectRepository.findByName(objectname);
             partRepository.save(new Part(partNumber, partSize, partMd5, object));
+            updateObjectETag(objectname);
         } catch (Exception e) {
             throw new RuntimeException("Unable to save part to database");
         }
@@ -224,5 +222,22 @@ public class StorageService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void updateObjectETag(String objectname) {
+        Object object = objectRepository.findByName(objectname);
+        List<Part> parts = partRepository.findByObjectId(object.getId());
+        long currentTime = new Date().getTime();
+        List<String> md5List = new ArrayList<>();
+
+        for (Part part : parts) {
+            md5List.add(part.getMd5());
+        }
+
+        String eTag = Utils.computeETag(md5List);
+
+        object.setModified(currentTime);
+        object.seteTag(eTag);
+        objectRepository.save(object);
     }
 }

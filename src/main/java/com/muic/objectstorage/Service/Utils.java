@@ -5,6 +5,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import javax.servlet.ServletInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.List;
 
 public class Utils {
     public static String calculateMd5(File file) {
@@ -22,5 +23,13 @@ public class Utils {
         } catch (Exception e) {
             throw new RuntimeException("Unable to calculate md5");
         }
+    }
+
+    public static String computeETag(List<String> md5List) {
+        StringBuilder eTag = new StringBuilder();
+        for (String s : md5List) {
+            eTag.append(s);
+        }
+        return Utils.calculateMd5FromString(eTag.toString()) + "-" + md5List.size();
     }
 }

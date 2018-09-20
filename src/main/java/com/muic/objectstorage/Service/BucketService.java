@@ -214,6 +214,7 @@ public class BucketService {
             Object object = objectRepository.findByName(objectname);
             if (Files.deleteIfExists(partPath)) {
                 partRepository.delete(partRepository.findByObjectIdAndNumber(object.getId(), partNumber));
+
             }
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
@@ -240,7 +241,7 @@ public class BucketService {
             length += part.getLength();
         }
 
-        String eTag = computeETag(md5List);
+        String eTag = Utils.computeETag(md5List);
 
         object.setModified(currentTime);
         object.seteTag(eTag);
@@ -287,14 +288,6 @@ public class BucketService {
         return Files.exists(partPath);
     }
 
-    private String computeETag(List<String> md5List) {
-        StringBuilder eTag = new StringBuilder();
-        for (String s : md5List) {
-            eTag.append(s);
-        }
-        return Utils.calculateMd5FromString(eTag.toString()) + "-" + md5List.size();
-    }
-
     private Boolean isValidObjectName(String objectname) {
         String regex = "^[A-Za-z0-9-_]+[A-Za-z0-9.-_]*[A-Za-z0-9_-]";
         Pattern pattern = Pattern.compile(regex);
@@ -307,5 +300,39 @@ public class BucketService {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(bucketname);
         return matcher.matches();
+    }
+
+    public String getObjectETag(String bucketname, String objectname) {
+        Bucket bucket = bucketRepository.findByName(bucketname);
+        if (bucket == null) {
+            return "";
+        }
+        Object object = objectRepository.findByNameAndBucketId(objectname, bucket.getId());
+        if (object == null) {
+            return "";
+        }
+        return object.geteTag();
+    }
+
+    public Long getObjectLength(String bucketname, String objectname) {
+        Bucket bucket = bucketRepository.findByName(bucketname);
+        if (bucket == null) {
+            return 0L;
+        }
+        Object object = objectRepository.findByNameAndBucketId(objectname, bucket.getId());
+        if (object == null) {
+            return 0L;
+        }
+
+        List<Part> parts = partRepository.findByObjectId(object.getId());
+        if (parts.isEmpty()) {
+            return 0L;
+        }
+
+        long length = 0;
+        for (Part part : parts) {
+            length += part.getLength();
+        }
+        return length;
     }
 }

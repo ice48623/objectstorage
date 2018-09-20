@@ -200,19 +200,20 @@ public class MainController {
         }
     }
 
-    // TODO: 19/9/2018 AD Verify with AJ about "eTag" and "length" of error response
     @RequestMapping(value = "/{bucketname}/{objectname}", params = "complete", method = RequestMethod.POST)
     public ResponseEntity<?> completeUpload(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("complete") String complete
     ) {
-
         try {
             HashMap<String, String> ret = bucketService.completeUpload(bucketname, objectname);
             return ResponseEntity.ok(new CompleteUploadResponse.normal(ret.get("eTag"), Integer.valueOf(ret.get("length")), ret.get("name")));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new CompleteUploadResponse.withError(
+                    bucketService.getObjectETag(bucketname, objectname),
+                    bucketService.getObjectLength(bucketname, objectname), objectname, e.getMessage()
+            ));
         }
     }
 

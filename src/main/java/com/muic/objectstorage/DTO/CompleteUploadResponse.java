@@ -40,11 +40,11 @@ public class CompleteUploadResponse {
 
     public static class withError {
         private String eTag;
-        private Integer length;
+        private long length;
         private String name;
         private String error;
 
-        public withError(String eTag, Integer length, String name, String error) {
+        public withError(String eTag, long length, String name, String error) {
             this.eTag = eTag;
             this.length = length;
             this.name = name;
@@ -59,7 +59,7 @@ public class CompleteUploadResponse {
             this.eTag = eTag;
         }
 
-        public Integer getLength() {
+        public Long getLength() {
             return length;
         }
 
