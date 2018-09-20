@@ -3,7 +3,7 @@ package com.muic.objectstorage.Entity;
 import javax.persistence.*;
 
 @Entity
-public class Part {
+public class Part implements Comparable<Part> {
     @Id
     private Integer number;
 
@@ -53,5 +53,10 @@ public class Part {
 
     public void setMd5(String md5) {
         this.md5 = md5;
+    }
+
+    @Override
+    public int compareTo(Part o) {
+        return this.getNumber().compareTo(o.getNumber());
     }
 }

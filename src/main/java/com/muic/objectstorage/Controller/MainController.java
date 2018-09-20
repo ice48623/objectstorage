@@ -8,11 +8,16 @@ import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Service.BucketService;
 import com.muic.objectstorage.Service.StorageService;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.SequenceInputStream;
 import java.util.HashMap;
 
 @RestController
@@ -128,12 +133,13 @@ public class MainController {
                 case "No value present":
                     return ResponseEntity.ok(new HashMap<>());
 
-                default: return ResponseEntity.notFound().build();
+                default:
+                    return ResponseEntity.notFound().build();
             }
         }
     }
 
-    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{bucketname}/{objectname}", params = "metadata", method = RequestMethod.GET)
     public ResponseEntity<HashMap<String, String>> getAllMetadata(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
@@ -207,5 +213,35 @@ public class MainController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @RequestMapping(value = "/{bucketname}/{objectname}", method = RequestMethod.GET)
+    public ResponseEntity<?> downloadObject(
+            @PathVariable("bucketname") String bucketname,
+            @PathVariable("objectname") String objectname,
+            @RequestHeader("Range") String range,
+//            @RequestHeader("ETag") String eTag,
+            HttpServletResponse response
+    ) {
+        FileInputStream input = null;
+        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", objectname));
+        SequenceInputStream sequenceInputStream = storageService.getObject(bucketname, objectname, "", range, input);
+        try {
+            IOUtils.copyLarge(sequenceInputStream, response.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println("Finally");
+            try {
+                if (input != null){
+                    System.out.println("close");
+                    input.close();
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
+        }
+        return ResponseEntity.ok().build();
     }
 }

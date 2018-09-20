@@ -9,6 +9,7 @@ import com.muic.objectstorage.Repository.PartRepository;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,16 +18,19 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.rmi.CORBA.Util;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class StorageService {
@@ -73,7 +77,7 @@ public class StorageService {
                     System.out.println(md5);
                     throw new FileStorageException("MD5Mismatched");
                 }
-                savePart(objectname, partNumber, partSize, partMd5);
+                savePart(objectname, partNumber, request.getContentLength(), md5);
                 return md5;
             }
             return null;
@@ -101,5 +105,121 @@ public class StorageService {
             throw new RuntimeException("Unable to save part to database");
         }
 
+    }
+
+    private String getFilename(String objectname, Integer partNumber) {
+        return StringUtils.cleanPath(String.format("%05d", partNumber) + "_" + objectname);
+    }
+
+    public void loadFile(String path, Long start, Long end) {
+        try {
+
+            FileInputStream fileInputStream = new FileInputStream(path);
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public SequenceInputStream getObject(String bucketname, String objectname, String eTag, String range, FileInputStream input) {
+
+        HashMap<String, Long> ranges = parseRange(range);
+        long start = ranges.get("start");
+        long end = ranges.get("end");
+
+        if (end < start) {
+            throw new RuntimeException("End < Start");
+        }
+
+        Object object = objectRepository.findByName(objectname);
+        List<Part> parts = partRepository.findByObjectId(object.getId());
+        Collections.sort(parts);
+
+        long objectLength = 0;
+        for (Part part : parts) {
+            objectLength += part.getLength();
+        }
+
+        if (end > objectLength) {
+            throw new RuntimeException("Invalid range");
+        }
+
+        long accumurator = 0;
+        List<InputStream> filesStream = new ArrayList<>();
+//        FileInputStream input = null;
+        boolean started = false;
+        try {
+            for (Part part : parts) {
+                System.out.println("Reading part: " + part.getNumber());
+                input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getNumber()));
+                long partLength = part.getLength() + accumurator;
+                if (start < partLength && end < partLength && !started) {
+                    // read from start to end
+                    System.out.println("reading from start to end");
+                    input.skip(start);
+                    filesStream.add(new BoundedInputStream(input, end - start));
+                    System.out.println(String.valueOf(start) + "-" + String.valueOf(end));
+                    break;
+                } else if (start < partLength && end > partLength) {
+                    // read from start to EOF
+                    System.out.println("read from start to EOF");
+                    input.skip(start);
+                    filesStream.add(new BoundedInputStream(input, part.getLength() - start));
+                    System.out.println(String.valueOf(start) + "-" + String.valueOf(part.getLength()));
+                } else if (end < partLength) {
+                    // read from SOF to end
+                    System.out.println("read from SOF to end");
+                    filesStream.add(new BoundedInputStream(input, partLength - end));
+                    System.out.println(String.valueOf(partLength) + "-" + end);
+                } else {
+                    // read whole file
+                    System.out.println("read whole file");
+                    filesStream.add(new BoundedInputStream(input));
+                }
+                started = true;
+                accumurator += part.getLength();
+//                filesStream.add(new BoundedInputStream(input));
+            }
+
+            return new SequenceInputStream(Collections.enumeration(filesStream));
+        } catch (IOException e) {
+            System.out.println("catch");
+            throw new RuntimeException(e);
+        }
+//        finally {
+//            System.out.println("Finally");
+//            try {
+//                if (input != null){
+//                    System.out.println("close");
+//                    input.close();
+//                }
+//            } catch (IOException e){
+//                e.printStackTrace();
+//            }
+//
+//        }
+
+
+//        InputStream input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, 1));
+//        input.skip(start);
+//        filesStream.add(new BoundedInputStream(input, end - start));
+
+//        SequenceInputStream sequenceInputStream = new SequenceInputStream(Collections.enumeration(filesStream));
+//
+//        return sequenceInputStream;
+
+    }
+
+    public HashMap<String, Long> parseRange(String range) {
+        try {
+            String[] ranges = range.split("-");
+            return new HashMap<String, Long>(){{
+                put("start", Long.valueOf(ranges[0]));
+                put("end", Long.valueOf(ranges[1]));
+            }};
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
