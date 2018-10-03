@@ -1,5 +1,5 @@
 mysql-data
-target/
+/target/*
 !target/*.jar
 !.mvn/wrapper/maven-wrapper.jar
 
