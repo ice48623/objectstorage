@@ -234,7 +234,7 @@ public class MainController {
             }
             response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", objectname));
             response.setHeader("ETag", storageService.getETag(objectname));
-
+            response.setHeader("Content-Length", bucketService.getObjectLength(bucketname, objectname).toString());
             IOUtils.copyLarge(sequenceInputStream, response.getOutputStream());
             return ResponseEntity.ok().build();
         } catch (IOException e) {
