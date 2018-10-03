@@ -1,6 +1,7 @@
 package com.muic.objectstorage.Service;
 
 import com.muic.objectstorage.Entity.Object;
+import com.muic.objectstorage.Entity.ObjectPartComposite;
 import com.muic.objectstorage.Entity.Part;
 import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Repository.BucketRepository;
@@ -88,7 +89,7 @@ public class StorageService {
     private void savePart(String objectname, Integer partNumber, Integer partSize, String partMd5) {
         try {
             Object object = objectRepository.findByName(objectname);
-            partRepository.save(new Part(partNumber, partSize, partMd5, object));
+            partRepository.save(new Part(new ObjectPartComposite(object.getId(), partNumber), partSize, partMd5, object));
             updateObjectETag(objectname);
         } catch (Exception e) {
             throw new RuntimeException("Unable to save part to database");
@@ -132,8 +133,8 @@ public class StorageService {
         boolean started = false;
         try {
             for (Part part : parts) {
-                System.out.println("Reading part: " + part.getNumber());
-                input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getNumber()));
+                System.out.println("Reading part: " + part.getId().getPartNumber());
+                input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getId().getPartNumber()));
                 long partLength = part.getLength() + currentPos;
 
                 if (end > currentPos) {
@@ -189,8 +190,8 @@ public class StorageService {
 
         try {
             for (Part part : parts) {
-                System.out.println("Reading part: " + part.getNumber());
-                input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getNumber()));
+                System.out.println("Reading part: " + part.getId().getPartNumber());
+                input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getId().getPartNumber()));
                 filesStream.add(input);
             }
             return new SequenceInputStream(Collections.enumeration(filesStream));

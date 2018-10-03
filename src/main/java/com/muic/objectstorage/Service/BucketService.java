@@ -213,7 +213,7 @@ public class BucketService {
             Path partPath = Paths.get(BASE_PATH + bucketname + "/" + fileName);
             Object object = objectRepository.findByName(objectname);
             if (Files.deleteIfExists(partPath)) {
-                partRepository.delete(partRepository.findByObjectIdAndNumber(object.getId(), partNumber));
+                partRepository.delete(partRepository.findById(new ObjectPartComposite(object.getId(), partNumber)).get());
                 updateObjectETag(objectname);
             }
         } catch (IOException e) {
