@@ -29,3 +29,5 @@ mysql-data
 /bucket/
 **/__pycache__/
 **/.pytest_cache
+
+.DS_Store
