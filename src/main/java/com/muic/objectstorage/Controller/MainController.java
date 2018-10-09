@@ -1,9 +1,6 @@
 package com.muic.objectstorage.Controller;
 
-import com.muic.objectstorage.DTO.BucketDTO;
-import com.muic.objectstorage.DTO.CompleteUploadResponse;
-import com.muic.objectstorage.DTO.CreateBucketDTO;
-import com.muic.objectstorage.DTO.FileUploadResponse;
+import com.muic.objectstorage.DTO.*;
 import com.muic.objectstorage.Entity.Bucket;
 import com.muic.objectstorage.Exception.FileStorageException;
 import com.muic.objectstorage.Service.BucketService;
@@ -19,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -242,13 +240,24 @@ public class MainController {
         } finally {
             System.out.println("Finally");
             try {
-                if (input != null){
+                if (input != null) {
                     System.out.println("close");
                     input.close();
                 }
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+    }
+
+    @RequestMapping(value = "/get_all_bucket", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllBucket() {
+        try {
+            return ResponseEntity.ok(new AllBucketDTO(bucketService.getAllBucket()));
+        } catch (Exception e) {
+            System.out.println("Enable to get all bucket");
+            return ResponseEntity.badRequest().build();
         }
 
     }
