@@ -98,9 +98,9 @@ public class BucketService {
             throw new RuntimeException("Bucket not exist");
         }
 
-        if (!isObjectExist(bucketname, objectname)) {
-            throw new RuntimeException("Object not exist");
-        }
+//        if (!isObjectExist(bucketname, objectname)) {
+//            throw new RuntimeException("Object not exist");
+//        }
 
         try {
             Object object = objectRepository.findByName(objectname);
