@@ -351,4 +351,10 @@ public class BucketService {
         object.seteTag(eTag);
         objectRepository.save(object);
     }
+
+    public List getAllBucket() {
+        List<String> buckets = new ArrayList<>();
+        bucketRepository.findAll().iterator().forEachRemaining(bucket -> buckets.add(bucket.getName()));
+        return buckets;
+    }
 }
