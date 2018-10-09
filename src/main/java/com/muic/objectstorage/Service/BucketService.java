@@ -103,10 +103,17 @@ public class BucketService {
         }
 
         try {
-            Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
-            if (Files.deleteIfExists(objectPath)) {
-                objectRepository.delete(objectRepository.findByName(objectname));
+            Object object = objectRepository.findByName(objectname);
+            List<Part> parts = partRepository.findByObjectId(object.getId());
+            for (Integer i = 1; i <= parts.size(); i++) {
+                String filename = getFilename(object.getName(), i);
+                Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + filename);
+                if (Files.deleteIfExists(objectPath)) {
+                    partRepository.delete(parts.get(i-1));
+                }
             }
+            objectRepository.delete(objectRepository.findByName(objectname));
+
         } catch (IOException e) {
             throw new RuntimeException("Could not delete object");
         }
@@ -356,5 +363,9 @@ public class BucketService {
         List<String> buckets = new ArrayList<>();
         bucketRepository.findAll().iterator().forEachRemaining(bucket -> buckets.add(bucket.getName()));
         return buckets;
+    }
+
+    private String getFilename(String objectname, Integer partNumber) {
+        return StringUtils.cleanPath(String.format("%05d", partNumber) + "_" + objectname);
     }
 }

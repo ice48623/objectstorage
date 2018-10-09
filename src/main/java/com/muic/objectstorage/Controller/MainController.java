@@ -37,6 +37,7 @@ public class MainController {
             Bucket bucket = bucketService.create(bucketname);
             return ResponseEntity.ok(new CreateBucketDTO(bucket.getCreated(), bucket.getModified(), bucket.getName()));
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -80,6 +81,7 @@ public class MainController {
             bucketService.deleteObject(bucketname, objectname);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -96,6 +98,7 @@ public class MainController {
             bucketService.addUpdateMetadataByKey(bucketname, objectname, key, value);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -162,6 +165,7 @@ public class MainController {
             BucketDTO bucketDTO = bucketService.listObjectsInBucket(bucketname);
             return ResponseEntity.ok(bucketDTO);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -179,6 +183,7 @@ public class MainController {
             String md5 = storageService.storeFile(requestServlet, bucketname, objectname, partNumber, partSize, partMd5);
             return ResponseEntity.ok(new FileUploadResponse.normal(md5, partSize, partNumber));
         } catch (FileStorageException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().body(new FileUploadResponse.withError(partMd5, partSize, partNumber, e.getMessage()));
         }
     }
@@ -208,6 +213,7 @@ public class MainController {
             HashMap<String, String> ret = bucketService.completeUpload(bucketname, objectname);
             return ResponseEntity.ok(new CompleteUploadResponse.normal(ret.get("eTag"), Integer.valueOf(ret.get("length")), ret.get("name")));
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().body(new CompleteUploadResponse.withError(
                     bucketService.getObjectETag(bucketname, objectname),
                     bucketService.getObjectLength(bucketname, objectname), objectname, e.getMessage()
