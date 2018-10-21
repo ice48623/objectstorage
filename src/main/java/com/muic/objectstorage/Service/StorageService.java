@@ -102,75 +102,73 @@ public class StorageService {
     }
 
     public SequenceInputStream getObjectWithRange(String bucketname, String objectname, String range, FileInputStream input) {
-
         HashMap<String, Long> ranges = parseRange(range);
-        long start = ranges.get("start");
+        long start = ranges.get("start") - 1;
         long end = ranges.get("end");
 
         if (end < start) {
             throw new RuntimeException("End < Start");
         }
 
-        System.out.println("Start:" + start + " End: " + end);
-
         Object object = objectRepository.findByName(objectname);
         List<Part> parts = partRepository.findByObjectId(object.getId());
         Collections.sort(parts);
 
-        long objectLength = 0;
-        for (Part part : parts) {
-            objectLength += part.getLength();
-        }
+        long objectLength = partRepository.getObjectLength();
+        System.out.println("object length: " + objectLength);
 
         if (end > objectLength) {
-            throw new RuntimeException("Invalid range");
+            throw new RuntimeException("Invalid Range");
         }
 
-        System.out.println("Object Length: " + objectLength);
-
-        long currentPos = 0;
+        Boolean started = false;
         List<InputStream> filesStream = new ArrayList<>();
-        boolean started = false;
+        Integer readSoFar = 0;
+        List<Part> filteredParts = new ArrayList<>();
+        Integer cutout = 0;
         try {
             for (Part part : parts) {
+                readSoFar += part.getLength();
+                if (readSoFar > start) {
+                    filteredParts.add(part);
+                } else {
+                    cutout += part.getLength();
+                }
+            }
+
+            readSoFar = cutout;
+            for (Part part : filteredParts) {
                 System.out.println("Reading part: " + part.getId().getPartNumber());
                 input = new FileInputStream(BASE_PATH + bucketname + "/" + getFilename(objectname, part.getId().getPartNumber()));
-                long partLength = part.getLength() + currentPos;
+                if (!started) {
+                    System.out.println("Read from start to EOF");
+                    Integer skip = (int) start - readSoFar;
+                    input.skip(skip);
 
-                if (end > currentPos) {
-                    if (start < partLength && end < partLength && !started) {
-                        // read from start to end
-                        System.out.println("reading from start to end");
-                        input.skip(start);
-                        filesStream.add(new BoundedInputStream(input, end - start));
-                        System.out.println(String.valueOf(start) + "-" + String.valueOf(end));
+                    if (end < part.getLength()) {
+                        filesStream.add(new BoundedInputStream(input, part.getLength() - skip - (part.getLength() - end)));
                         break;
-                    } else if (start < partLength && end >= partLength) {
-                        // read from start to EOF
-                        System.out.println("read from start to EOF");
-                        input.skip(start - currentPos);
-                        filesStream.add(new BoundedInputStream(input, part.getLength() - start));
-                        System.out.println(String.valueOf(currentPos) + "-" + String.valueOf(part.getLength()));
-                    } else if (end < partLength) {
-                        // read from SOF to end
-                        System.out.println("read from SOF to end");
-                        filesStream.add(new BoundedInputStream(input, end - currentPos));
-                        System.out.println(String.valueOf(partLength) + "-" + end);
-                    } else if (start < currentPos || end > partLength && started) {
-                        //read whole file
-                        System.out.println("read whole file");
-                        filesStream.add(new BoundedInputStream(input));
+                    } else {
+                        filesStream.add(new BoundedInputStream(input, part.getLength() - skip));
                     }
+                } else if (end < readSoFar + part.getLength()) {
+                    System.out.println("Read from SOF to end");
+                    System.out.println(((readSoFar + part.getLength()) - end));
+                    filesStream.add(new BoundedInputStream(input, part.getLength() -  ((readSoFar + part.getLength()) - end)));
+                    break;
+                } else {
+                    System.out.println("Read Whole File");
+                    filesStream.add(new BoundedInputStream(input, part.getLength()));
                 }
 
-
+                readSoFar += part.getLength();
                 started = true;
-                currentPos += part.getLength();
             }
             return new SequenceInputStream(Collections.enumeration(filesStream));
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public SequenceInputStream getFile(String bucketname, String objectname, FileInputStream input) {
@@ -205,6 +203,7 @@ public class StorageService {
     }
 
     public HashMap<String, Long> parseRange(String range) {
+        System.out.println(range);
         try {
             String[] ranges = range.split("-");
             return new HashMap<String, Long>(){{
