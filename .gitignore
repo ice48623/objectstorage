@@ -1,6 +1,6 @@
 mysql-data
+/target/*
 !target/*.jar
-/target/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
