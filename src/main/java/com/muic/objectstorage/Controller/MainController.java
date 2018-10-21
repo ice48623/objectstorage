@@ -119,13 +119,14 @@ public class MainController {
         }
     }
 
-    @RequestMapping(value = "/{bucketname}/{objectname}", params = "key", method = RequestMethod.GET)
+    @RequestMapping(value = "/{bucketname}/{objectname}", params = {"key", "metadata"}, method = RequestMethod.GET)
     public ResponseEntity<HashMap<String, String>> getMetadataByKey(
             @PathVariable("bucketname") String bucketname,
             @PathVariable("objectname") String objectname,
             @RequestParam("metadata") String metadataAction,
             @RequestParam("key") String key
     ) {
+        System.out.println("get by key");
         try {
             HashMap<String, String> ret = bucketService.getMetadataByKey(bucketname, objectname, key);
             return ResponseEntity.ok(ret);
@@ -147,6 +148,7 @@ public class MainController {
             @PathVariable("objectname") String objectname,
             @RequestParam("metadata") String metadataAction
     ) {
+        System.out.println("get all");
         try {
             HashMap<String, String> ret = bucketService.getAllMetadata(bucketname, objectname);
             return ResponseEntity.ok(ret);

@@ -126,7 +126,7 @@ public class BucketService {
             throw new RuntimeException("Bucket not exist");
         }
 
-        if (!isObjectExist(bucketname, objectname)) {
+        if (!isObjectExistInDB(bucketname, objectname)) {
             throw new RuntimeException("Object not exist");
         }
         Object object = objectRepository.findByName(objectname);
@@ -154,7 +154,7 @@ public class BucketService {
             throw new RuntimeException("Bucket not exist");
         }
 
-        if (!isObjectExist(bucketname, objectname)) {
+        if (!isObjectExistInDB(bucketname, objectname)) {
             throw new RuntimeException("Object not exist");
         }
 
@@ -273,6 +273,12 @@ public class BucketService {
     private Boolean isObjectExist(String bucketname, String objectname) {
         Path objectPath = Paths.get(BASE_PATH + bucketname + "/" + objectname);
         return Files.exists(objectPath);
+    }
+
+    private Boolean isObjectExistInDB(String bucketname, String objectname) {
+        Bucket bucket = bucketRepository.findByName(bucketname);
+        Object object =objectRepository.findByName(objectname);
+        return bucket != null && object != null;
     }
 
     public Boolean isBucketExist(String bucketname) {
