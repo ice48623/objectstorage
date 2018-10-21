@@ -90,12 +90,12 @@ def test_download():
 		A = random.randint(0, len(data))
 		B = random.randint(0, len(data))
 		if (A < B):
-			headers = {'Range': str(A)+'-'+str(B)}
+			headers = {'Range': 'bytes='+str(A)+'-'+str(B)}
 			realData = data[A:B+1]
 			realMD5 = hashlib.md5(realData).hexdigest()
 
 		else:
-			headers = {'Range': str(B)+'-'+str(A)}
+			headers = {'Range': 'bytes='+str(B)+'-'+str(A)}
 			realData = data[B:A+1]
 			realMD5 = hashlib.md5(realData).hexdigest()
 

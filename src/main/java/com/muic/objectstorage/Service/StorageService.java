@@ -205,7 +205,7 @@ public class StorageService {
     public HashMap<String, Long> parseRange(String range) {
         System.out.println(range);
         try {
-            String[] ranges = range.split("-");
+            String[] ranges = range.split("=")[1].split("-");
             return new HashMap<String, Long>(){{
                 put("start", Long.valueOf(ranges[0]));
                 put("end", Long.valueOf(ranges[1]));
