@@ -103,7 +103,7 @@ public class StorageService {
 
     public SequenceInputStream getObjectWithRange(String bucketname, String objectname, String range, FileInputStream input) {
         HashMap<String, Long> ranges = parseRange(range);
-        long start = ranges.get("start") - 1;
+        long start = ranges.get("start");
         long end = ranges.get("end");
 
         if (end < start) {
@@ -154,7 +154,7 @@ public class StorageService {
                 } else if (end < readSoFar + part.getLength()) {
                     System.out.println("Read from SOF to end");
                     System.out.println(((readSoFar + part.getLength()) - end));
-                    filesStream.add(new BoundedInputStream(input, part.getLength() -  ((readSoFar + part.getLength()) - end)));
+                    filesStream.add(new BoundedInputStream(input, part.getLength() -  ((readSoFar + part.getLength()) - end) + 1));
                     break;
                 } else {
                     System.out.println("Read Whole File");
