@@ -179,11 +179,11 @@ def test_metaData():
 	resp = requests.post(BASE_URL + '/forMeta/WTF?create')
 	assert resp.status_code == STATUS_OK
 
-	# resp = requests.put(BASE_URL + '/forMeta/WTF?metadata&key=KK', data="insert me")
-	# assert resp.status_code == STATUS_OK
-	#
-	# resp = requests.put(BASE_URL + '/forMeta/WTF?metadata&key=KK', data="modified")
-	# assert resp.status_code == STATUS_OK
+	resp = requests.put(BASE_URL + '/forMeta/WTF?metadata&key=KK', data="insert me")
+	assert resp.status_code == STATUS_OK
+
+	resp = requests.put(BASE_URL + '/forMeta/WTF?metadata&key=KK', data="modified")
+	assert resp.status_code == STATUS_OK
 
 	resp = requests.get(BASE_URL + '/forMeta/WTF?metadata&key=KK')
 	assert resp.status_code == STATUS_OK
